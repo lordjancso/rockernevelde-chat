@@ -9,8 +9,8 @@ app.engine('jade', require('jade').__express);
 app.get("/", function(req, res){
 	res.render("page");
 });
-
 app.use(express.static(__dirname + '/public'));
+
 var io = require('socket.io').listen(app.listen(port));
 
 io.sockets.on('connection', function(socket) {
@@ -24,9 +24,9 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('disconnect', function(data) {
-		for( var i=0, len=clients.length; i<len; ++i ){
+		for( var i=0, len=clients.length; i<len; ++i ) {
 			var c = clients[i];
-			if(c.clientId == socket.id){
+			if(c.clientId == socket.id) {
 				clients.splice(i,1);
 				io.sockets.emit('disconnect', c.customId);
 				io.sockets.emit('participants', clients);

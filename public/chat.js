@@ -1,7 +1,6 @@
 ﻿$(document).ready(function() {
 	var socket = io.connect();
 	var messages = [];
-    var _NAME = "guest "+Math.floor((Math.random()*20)+1);
 
 	socket.on('connecting', function() {
 		console.log('connecting...');
@@ -31,9 +30,8 @@
 	});
 
 	socket.on('disconnect', function(data) {
-		console.log(data);
 		socket.emit('send', {
-			message: _NAME + ' kilépett a chatről!',
+			message: data + ' kilépett a chatről!',
 			time: formatTimeOfDay($.now())
 		});
 	});
