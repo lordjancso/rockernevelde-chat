@@ -1,6 +1,7 @@
 ﻿$(document).ready(function() {
 	var socket = io.connect();
 	var messages = [];
+    var _NAME = "guest "+Math.floor((Math.random()*20)+1);
 
 	socket.on('connecting', function() {
 		console.log('connecting...');
