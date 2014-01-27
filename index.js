@@ -1,7 +1,7 @@
 ﻿var express = require("express");
 var app = express();
 var port = process.env.PORT;
-//var port = 5000;
+var clients = [];
 
 app.set('views', __dirname + '/tpl');
 app.set('view engine', "jade");
@@ -12,12 +12,30 @@ app.get("/", function(req, res){
 
 app.use(express.static(__dirname + '/public'));
 var io = require('socket.io').listen(app.listen(port));
-console.log("Listening on port " + port);
 
-io.sockets.on('connection', function (socket) {
-	socket.emit('message', { message: 'welcome to the chat' });
-	io.sockets.emit('message', { message: 'new participant on the chat!' });
-	socket.on('send', function (data) {
+io.sockets.on('connection', function(socket) {
+
+	socket.on('storeClientInfo', function(data) {
+		var clientInfo = new Object();
+		clientInfo.customId = data.customId;
+		clientInfo.clientId = socket.id;
+		clients.push(clientInfo);
+		io.sockets.emit('participants', clients);
+	});
+
+	socket.on('disconnect', function(data) {
+		for( var i=0, len=clients.length; i<len; ++i ){
+			var c = clients[i];
+			if(c.clientId == socket.id){
+				clients.splice(i,1);
+				io.sockets.emit('disconnect', c.customId);
+				break;
+			}
+		}
+	});
+
+	socket.on('send', function(data) {
 		io.sockets.emit('message', data);
 	});
+
 });

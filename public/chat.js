@@ -1,53 +1,85 @@
-﻿window.onload = function() {
+﻿$(document).ready(function() {
+	var socket = io.connect();
+	var messages = [];
+    var _NAME = "guest "+Math.floor((Math.random()*20)+1);
 
-    var messages = [];
-    var socket = io.connect();
-    var field = document.getElementById("field");
-    var sendButton = document.getElementById("send");
-    var content = document.getElementById("content");
-    var name = document.getElementById("name");
-	
 	socket.on('connecting', function() {
-		console.log('connecting');
-		socket.emit('message', {message: 'connecting...'});
-	});
-	
-	socket.on('disconnect', function() {
-		console.log('someone left...');
-		socket.emit('message', { message: 'someone left...' });
+		console.log('connecting...');
 	});
 
-    socket.on('message', function (data) {
+	socket.on('connect', function() {
+		socket.emit('storeClientInfo', {
+			customId: _NAME
+		});
+		socket.emit('send', {
+			message: _NAME + ' belépett a chatre!',
+			time: formatTimeOfDay($.now())
+		});
+	});
+	
+	socket.on('participants', function(data) {
+		var users = [];
+		var html = '';
+		jQuery.each(data, function(i, user) {
+			users.push(user.customId);
+		});
+		users.sort();
+		jQuery.each(users, function(i, user) {
+			html += user + '<br/>';
+		});
+		$('#participants').html(html);
+	});
+
+	socket.on('disconnect', function(data) {
+		console.log(data);
+		socket.emit('send', {
+			message: _NAME + ' kilépett a chatről!',
+			time: formatTimeOfDay($.now())
+		});
+	});
+
+    socket.on('message', function(data) {
         if(data.message) {
             messages.push(data);
             var html = '';
             for(var i=0; i<messages.length; i++) {
-                html += '<b>' + (messages[i].username ? messages[i].username : 'Server') + ': </b>';
+                html += '<b>' + messages[i].time + ' ' + (messages[i].username ? messages[i].username : 'Server') + ': </b>';
                 html += messages[i].message + '<br />';
             }
-            content.innerHTML = html;
-			$("#content").scrollTop($("#content")[0].scrollHeight);
+			$('#content').html(html);
+			$('#content').scrollTop($('#content')[0].scrollHeight);
         } else {
-            console.log("There is a problem:", data);
+            console.log("There is a problem: ", data);
         }
     });
-
-    sendButton.onclick = sendMessage = function() {
-        if(name.value == "") {
-            alert("Please type your name!");
-        } else {
-            var text = field.value;
-			socket.emit('send', { message: text, username: name.value });
-			field.value = "";
-        }
-    };
-
-	$(document).ready(function() {
-		$("#field").keyup(function(e) {
-			if(e.keyCode == 13) {
-				sendMessage();
-			}
+	
+	function sendMessage() {
+		var text = $('#field').val();
+		socket.emit('send', {
+			username: _NAME,
+			message: text,
+			time: formatTimeOfDay($.now())
 		});
+		$('#field').val('');
+	}
+
+	$('#send').on('click', sendMessage);
+
+	$("#field").keyup(function(e) {
+		if(e.keyCode == 13) {
+			sendMessage();
+		}
 	});
 
-}
+	function formatTimeOfDay(millisSinceEpoch) {
+		var secondsSinceEpoch = (millisSinceEpoch / 1000) | 0;
+		var secondsInDay = ((secondsSinceEpoch % 86400) + 86400) % 86400;
+		var seconds = secondsInDay % 60;
+		var minutes = ((secondsInDay / 60) | 0) % 60;
+		var hours = (secondsInDay / 3600) | 0;
+		hours++;
+		return hours + (minutes < 10 ? ":0" : ":")
+			+ minutes + (seconds < 10 ? ":0" : ":")
+			+ seconds;
+	}
+});
