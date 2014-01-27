@@ -30,7 +30,8 @@
 		$('#participants').html(html);
 	});
 
-	socket.on('disconnect', function(data) {
+	socket.on('left', function(data) {
+		console.log('left');
 		socket.emit('send', {
 			message: data + ' kilépett a chatről!',
 			time: formatTimeOfDay($.now())
@@ -42,6 +43,7 @@
             messages.push(data);
             var html = '';
             for(var i=0; i<messages.length; i++) {
+				if(!messages[i].time) messages[i].time = formatTimeOfDay($.now())
                 html += '<b>' + messages[i].time + ' ' + (messages[i].username ? messages[i].username : 'Server') + ': </b>';
                 html += messages[i].message + '<br />';
             }
