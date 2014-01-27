@@ -8,7 +8,13 @@
     var name = document.getElementById("name");
 	
 	socket.on('connecting', function() {
+		console.log('connecting');
 		socket.emit('message', {message: 'connecting...'});
+	});
+	
+	socket.on('disconnect', function() {
+		console.log('someone left...');
+		socket.emit('message', { message: 'someone left...' });
 	});
 
     socket.on('message', function (data) {
