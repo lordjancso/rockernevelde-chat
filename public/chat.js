@@ -6,6 +6,10 @@
     var sendButton = document.getElementById("send");
     var content = document.getElementById("content");
     var name = document.getElementById("name");
+	
+	socket.on('connecting', function() {
+		socket.emit('message', {message: 'connecting...'});
+	});
 
     socket.on('message', function (data) {
         if(data.message) {

@@ -1,6 +1,7 @@
 ﻿var express = require("express");
 var app = express();
-var port = process.env.PORT;
+//var port = process.env.PORT;
+var port = 5000;
 
 app.set('views', __dirname + '/tpl');
 app.set('view engine', "jade");
@@ -19,5 +20,7 @@ io.sockets.on('connection', function (socket) {
 	socket.on('send', function (data) {
 		io.sockets.emit('message', data);
 	});
+	socket.on('disconnect', function() {
+		io.sockets.emit('message', { message: 'someone left...' });
+	});
 });
-
