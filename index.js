@@ -29,6 +29,7 @@ io.sockets.on('connection', function(socket) {
 			if(c.clientId == socket.id){
 				clients.splice(i,1);
 				io.sockets.emit('disconnect', c.customId);
+				io.sockets.emit('participants', clients);
 				break;
 			}
 		}
