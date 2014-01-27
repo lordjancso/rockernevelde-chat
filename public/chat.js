@@ -30,14 +30,6 @@
 		$('#participants').html(html);
 	});
 
-	socket.on('left', function(data) {
-		console.log('left');
-		socket.emit('send', {
-			message: data + ' kilépett a chatről!',
-			time: formatTimeOfDay($.now())
-		});
-	});
-
     socket.on('message', function(data) {
         if(data.message) {
             messages.push(data);

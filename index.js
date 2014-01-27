@@ -1,7 +1,6 @@
 ﻿var express = require("express");
 var app = express();
-//var port = process.env.PORT;
-var port = 5000;
+var port = process.env.PORT;
 var clients = [];
 
 app.set('views', __dirname + '/tpl');
