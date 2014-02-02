@@ -1,14 +1,16 @@
 ﻿doctype
 html
     head
-        title= "Real time web chat"
-        script(src='http://code.jquery.com/jquery-latest.js')
-        script(src='/socket.io/socket.io.js')
-        script(src='/chat.js')
+        title= "Rockernevelde chat"
+        script(src='http://code.jquery.com/jquery-latest.js', type='text/javascript')
+        script(src='/socket.io/socket.io.js', type='text/javascript')
+        script(src='/chat.js', type='text/javascript')
+        link(href='/layout.css', rel='stylesheet', type='text/css')
     body
-        #content(style='width: 500px; height: 300px; margin: 0 0 20px 0; border: 1px solid #999; overflow-y: scroll; float: left;')
-        #participants(style='width: 300px; height: 300px; margin: 0 0 0 20px; border: 1px solid #999; float: left')
-        div(style='clear: both;')
-    .controls
-        input#field(style='width:350px;')
-        input#send(type='button', value='send')
+        div#chat_content
+        div#chat_participants
+        div.clear
+    div#chat_controls
+        textarea#chat_text
+        div#chat_send_container
+            input#chat_send(type='button', value='send')

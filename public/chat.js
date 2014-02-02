@@ -1,66 +1,119 @@
 ﻿$(document).ready(function() {
-	var socket = io.connect();
+	if(typeof _WEBSOCKET_URL == 'undefined') {
+		var _WEBSOCKET_URL = '';
+	}
+	if(typeof _ID == 'undefined') {
+		var _ID = Math.floor((Math.random()*200)+1);
+	}
+	if(typeof _NAME == 'undefined') {
+		var _NAME = 'guest ' + _ID;
+	}
+
+	var socket = io.connect(_WEBSOCKET_URL);
 	var messages = [];
-    var _NAME = "guest "+Math.floor((Math.random()*20)+1);
+	var _SERVER = 'Robot';
 
 	socket.on('connecting', function() {
-		console.log('connecting...');
+		var data = {
+			username: _SERVER,
+			message: 'Kapcsolódás folyamatban! Kérlek várj!',
+			time: formatTimeOfDay($.now())
+		};
+		writeMessage(data);
 	});
 
 	socket.on('connect', function() {
 		socket.emit('storeClientInfo', {
-			customId: _NAME
+			userid: _ID,
+			username: _NAME
 		});
-		socket.emit('send', {
+		var data = {
+			username: _SERVER,
 			message: _NAME + ' belépett a chatre!',
 			time: formatTimeOfDay($.now())
-		});
+		};
+		sendMessage(data);
 	});
-	
+
+	socket.on('userLeft', function(user) {
+		var data = {
+			username: _SERVER,
+			message: user + ' kilépett!',
+			time: formatTimeOfDay($.now())
+		};
+		sendMessage(data);
+	});
+
 	socket.on('participants', function(data) {
 		var users = [];
 		var html = '';
-		jQuery.each(data, function(i, user) {
-			users.push(user.customId);
+		$.each(data, function(i, user) {
+			users.push({
+				userid: user.userid,
+				username: user.username
+			});
 		});
-		users.sort();
-		jQuery.each(users, function(i, user) {
-			html += user + '<br/>';
+		users.sort(function(a,b) {
+			if(a.username > b.username){return 1}
+			if(a.username < b.username){return -1}
+			return 0;
 		});
-		$('#participants').html(html);
+		$.each(users, function(i, user) {
+			html += '<div class="name">';
+				html += user.username
+				html += '<span class="id">' + user.userid + '</span>';
+			html += '</div>';
+		});
+		$('#chat_participants').html(html);
 	});
 
-    socket.on('message', function(data) {
-        if(data.message) {
-            messages.push(data);
-            var html = '';
-            for(var i=0; i<messages.length; i++) {
-				if(!messages[i].time) messages[i].time = formatTimeOfDay($.now())
-                html += '<b>' + messages[i].time + ' ' + (messages[i].username ? messages[i].username : 'Server') + ': </b>';
-                html += messages[i].message + '<br />';
-            }
-			$('#content').html(html);
-			$('#content').scrollTop($('#content')[0].scrollHeight);
-        } else {
-            console.log("There is a problem: ", data);
-        }
-    });
-	
-	function sendMessage() {
-		var text = $('#field').val();
-		socket.emit('send', {
-			username: _NAME,
-			message: text,
-			time: formatTimeOfDay($.now())
-		});
-		$('#field').val('');
+	socket.on('message', function(data) {
+		if(data.message) {
+			writeMessage(data);
+		} else {
+			console.log('There is a problem: ', data);
+		}
+	});
+
+	function sendMessage(data) {
+		if($.trim(data.message)) {
+			socket.emit('send', {
+				username: data.username,
+				message: $.trim(data.message),
+				time: data.time
+			});
+			$('#chat_text').val('');
+		}
 	}
 
-	$('#send').on('click', sendMessage);
+	function writeMessage(data) {
+		messages.push(data);
+		var html = '';
+		for(var i=0; i<messages.length; i++) {
+			html += '<span class="time">' + messages[i].time + '</span>';
+			html += '<span class="name"> ' + messages[i].username + ': </span>';
+			html += messages[i].message + '<br />';
+		}
+		$('#chat_content').html(html);
+		$('#chat_content').scrollTop($('#chat_content')[0].scrollHeight);
+	}
 
-	$("#field").keyup(function(e) {
+	$('#chat_send').on('click', function() {
+		var data = {
+			username: _NAME,
+			message: $('#chat_text').val(),
+			time: formatTimeOfDay($.now())
+		};
+		sendMessage(data);
+	});
+	$("#chat_text").keyup(function(e) {
 		if(e.keyCode == 13) {
-			sendMessage();
+			var data = {
+				username: _NAME,
+				message: $('#chat_text').val(),
+				time: formatTimeOfDay($.now())
+			};
+			sendMessage(data);
 		}
 	});
 
@@ -72,7 +125,8 @@
 		var hours = (secondsInDay / 3600) | 0;
 		hours++;
 		return hours + (minutes < 10 ? ":0" : ":")
-			+ minutes + (seconds < 10 ? ":0" : ":")
-			+ seconds;
+			+ minutes;
+			//+ minutes + (seconds < 10 ? ":0" : ":")
+			//+ seconds;
 	}
 });

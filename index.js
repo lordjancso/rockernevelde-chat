@@ -1,6 +1,9 @@
 ﻿var express = require("express");
 var app = express();
 var port = process.env.PORT;
+if(typeof port == 'undefined') {
+	port = 5000;
+}
 var clients = [];
 
 app.set('views', __dirname + '/tpl');
@@ -17,20 +20,19 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('storeClientInfo', function(data) {
 		var clientInfo = new Object();
-		clientInfo.customId = data.customId;
+		clientInfo.userid = data.userid;
+		clientInfo.username = data.username;
 		clientInfo.clientId = socket.id;
 		clients.push(clientInfo);
 		io.sockets.emit('participants', clients);
 	});
 
 	socket.on('disconnect', function() {
-		for( var i=0, len=clients.length; i<len; ++i ) {
+		for(var i=0, len=clients.length; i<len; ++i) {
 			var c = clients[i];
 			if(c.clientId == socket.id) {
 				clients.splice(i,1);
-				io.sockets.emit('message', {
-					message: c.customId + ' kilépett a chatről!'
-				});
+				io.sockets.emit('userLeft', c.username);
 				io.sockets.emit('participants', clients);
 				break;
 			}
