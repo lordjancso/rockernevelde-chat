@@ -53,9 +53,9 @@
 				username: user.username
 			});
 		});
-		users.sort(function(a,b) {
-			if(a.username > b.username){return 1}
-			if(a.username < b.username){return -1}
+		users.sort(function(a, b) {
+			if(a.username > b.username){return 1;}
+			if(a.username < b.username){return -1;}
 			return 0;
 		});
 		$.each(users, function(i, user) {
