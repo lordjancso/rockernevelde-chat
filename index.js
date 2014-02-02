@@ -4,6 +4,7 @@ var port = process.env.PORT;
 if(typeof port == 'undefined') {
 	port = 5000;
 }
+console.log(port);
 var clients = [];
 
 app.set('views', __dirname + '/tpl');
