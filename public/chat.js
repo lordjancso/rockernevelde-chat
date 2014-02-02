@@ -41,7 +41,7 @@
 			message: user + ' kilépett!',
 			time: formatTimeOfDay($.now())
 		};
-		sendMessage(data);
+		writeMessage(data);
 	});
 
 	socket.on('participants', function(data) {
