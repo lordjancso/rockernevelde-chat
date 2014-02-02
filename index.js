@@ -5,6 +5,7 @@ if(typeof port == 'undefined') {
 	port = 5000;
 }
 console.log(port);
+console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
 var clients = [];
 
 app.set('views', __dirname + '/tpl');
